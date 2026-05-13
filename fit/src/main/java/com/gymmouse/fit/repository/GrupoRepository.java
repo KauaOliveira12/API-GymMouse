@@ -1,10 +1,9 @@
 package com.gymmouse.fit.repository;
 
-import com.gymmouse.fit.model.Usuario;
+import com.gymmouse.fit.model.Grupo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
-    Usuario findByEmail(String email);
+public interface GrupoRepository extends JpaRepository<Grupo, Long> {
 }
