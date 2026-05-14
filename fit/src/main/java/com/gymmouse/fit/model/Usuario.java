@@ -1,5 +1,6 @@
 package com.gymmouse.fit.model; // Atenção: mude 'com.seuprojeto.gymmouse' para o nome da sua pasta base!
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 @Entity
@@ -15,11 +16,11 @@ public class Usuario {
     @Column(unique = true)
     private String email;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String senha;
 
     private int pontosTotais = 0;
 
-    // Métodos para o Java conseguir ler e alterar as variáveis (Getters e Setters)
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
