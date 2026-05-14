@@ -24,6 +24,9 @@ public class Grupo {
     @JoinColumn(name = "criador_id", nullable = false)
     private Usuario criador;
 
+    @Transient
+    private Long totalMembros;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -38,4 +41,7 @@ public class Grupo {
 
     public Usuario getCriador() { return criador; }
     public void setCriador(Usuario criador) { this.criador = criador; }
+
+    public Long getTotalMembros() { return totalMembros; }
+    public void setTotalMembros(Long totalMembros) { this.totalMembros = totalMembros; }
 }

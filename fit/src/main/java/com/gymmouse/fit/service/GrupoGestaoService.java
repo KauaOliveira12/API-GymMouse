@@ -80,6 +80,7 @@ public class GrupoGestaoService {
         g.setCodigoAcesso(gerarCodigoAcessoUnico());
         Grupo salvo = grupoRepository.save(g);
         vincularMembro(criador, salvo);
+        salvo.setTotalMembros(usuarioGrupoRepository.countByGrupoId(salvo.getId()));
         return new CriarStatus(CriarResultado.OK, salvo);
     }
 
@@ -127,7 +128,9 @@ public class GrupoGestaoService {
         if (req.getDescricao() != null) {
             g.setDescricao(req.getDescricao().isBlank() ? null : req.getDescricao().trim());
         }
-        return new AtualizarStatus(AtualizarResultado.OK, grupoRepository.save(g));
+        Grupo salvo = grupoRepository.save(g);
+        salvo.setTotalMembros(usuarioGrupoRepository.countByGrupoId(salvo.getId()));
+        return new AtualizarStatus(AtualizarResultado.OK, salvo);
     }
 
     public enum DeletarResultado {

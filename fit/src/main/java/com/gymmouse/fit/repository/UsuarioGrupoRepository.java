@@ -15,6 +15,8 @@ public interface UsuarioGrupoRepository extends JpaRepository<UsuarioGrupo, Long
 
     boolean existsByUsuarioIdAndGrupoId(Long usuarioId, Long grupoId);
 
+    long countByGrupoId(Long grupoId);
+
     Optional<UsuarioGrupo> findByUsuarioIdAndGrupoId(Long usuarioId, Long grupoId);
 
     void deleteByUsuarioIdAndGrupoId(Long usuarioId, Long grupoId);
@@ -33,6 +35,7 @@ public interface UsuarioGrupoRepository extends JpaRepository<UsuarioGrupo, Long
                     FROM usuario_grupo ug
                     INNER JOIN usuarios u ON u.id = ug.usuario_id
                     LEFT JOIN registro_pontuacao r ON r.usuario_id = u.id
+                        AND r.grupo_id = ug.grupo_id
                         AND r.data_registro >= DATE(ug.data_entrada)
                     WHERE ug.grupo_id = :grupoId
                     GROUP BY u.id, u.nome

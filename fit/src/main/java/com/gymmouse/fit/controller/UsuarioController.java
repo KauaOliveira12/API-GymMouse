@@ -1,6 +1,7 @@
 package com.gymmouse.fit.controller; // Ajuste para o seu pacote
 
 import com.gymmouse.fit.dto.AdicionarPontosRequest;
+import com.gymmouse.fit.dto.AtualizarUsuarioRequest;
 import com.gymmouse.fit.dto.CriarGrupoCorpoLeve;
 import com.gymmouse.fit.dto.CriarGrupoRequest;
 import com.gymmouse.fit.model.Grupo;
@@ -46,6 +47,42 @@ public class UsuarioController {
 
         // Se errou a senha ou não existe o e-mail, devolve erro 401 (Não autorizado)
         return ResponseEntity.status(401).build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Usuario> buscarUsuario(@PathVariable Long id) {
+        return repository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(404).build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Usuario> atualizarUsuario(
+            @PathVariable Long id,
+            @RequestBody(required = false) AtualizarUsuarioRequest body
+    ) {
+        if (body == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return repository.findById(id).map(usuario -> {
+            String nome = body.getNome() == null ? "" : body.getNome().trim();
+            String email = body.getEmail() == null ? "" : body.getEmail().trim();
+            if (nome.isBlank() || email.isBlank()) {
+                return ResponseEntity.badRequest().<Usuario>build();
+            }
+
+            Usuario usuarioComEmail = repository.findByEmail(email);
+            if (usuarioComEmail != null && !usuarioComEmail.getId().equals(id)) {
+                return ResponseEntity.status(409).<Usuario>build();
+            }
+
+            usuario.setNome(nome);
+            usuario.setEmail(email);
+            if (body.getSenha() != null && !body.getSenha().isBlank()) {
+                usuario.setSenha(body.getSenha());
+            }
+            return ResponseEntity.ok(repository.save(usuario));
+        }).orElseGet(() -> ResponseEntity.status(404).build());
     }
 
     /**

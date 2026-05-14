@@ -124,7 +124,16 @@ public class GrupoMembroService {
         if (usuarioId == null || !usuarioRepository.existsById(usuarioId)) {
             return List.of();
         }
-        return usuarioGrupoRepository.findGruposByUsuarioId(usuarioId);
+        List<Grupo> grupos = usuarioGrupoRepository.findGruposByUsuarioId(usuarioId);
+        for (Grupo g : grupos) {
+            popularTotalMembros(g);
+        }
+        return grupos;
+    }
+
+    public void popularTotalMembros(Grupo grupo) {
+        if (grupo == null || grupo.getId() == null) return;
+        grupo.setTotalMembros(usuarioGrupoRepository.countByGrupoId(grupo.getId()));
     }
 
     public List<RankingPosicao> rankingPorGrupo(Long grupoId) {

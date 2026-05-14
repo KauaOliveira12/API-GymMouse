@@ -139,6 +139,7 @@ public class GrupoController {
             return ResponseEntity.ok(grupoMembroService.listarGruposDoUsuario(usuarioId));
         }
         List<Grupo> grupos = repository.findAll();
+        grupos.forEach(grupoMembroService::popularTotalMembros);
         return ResponseEntity.ok(grupos);
     }
 
@@ -147,7 +148,9 @@ public class GrupoController {
         Optional<Grupo> grupo = repository.findById(id);
 
         if (grupo.isPresent()) {
-            return ResponseEntity.ok(grupo.get());
+            Grupo g = grupo.get();
+            grupoMembroService.popularTotalMembros(g);
+            return ResponseEntity.ok(g);
         }
 
         return ResponseEntity.status(404).build();
