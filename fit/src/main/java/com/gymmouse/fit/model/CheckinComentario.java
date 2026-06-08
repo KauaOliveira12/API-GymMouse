@@ -20,6 +20,10 @@ public class CheckinComentario {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "comentario_pai_id")
+    private CheckinComentario comentarioPai;
+
     @Column(nullable = false, length = 500)
     private String texto;
 
@@ -48,6 +52,14 @@ public class CheckinComentario {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+    }
+
+    public CheckinComentario getComentarioPai() {
+        return comentarioPai;
+    }
+
+    public void setComentarioPai(CheckinComentario comentarioPai) {
+        this.comentarioPai = comentarioPai;
     }
 
     public String getTexto() {

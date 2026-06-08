@@ -83,6 +83,22 @@ public class CheckinController {
         return ResponseEntity.ok(comentario);
     }
 
+    @PostMapping("/api/checkins/{checkinId}/comentarios/{comentarioId}/respostas")
+    public ResponseEntity<ComentarioResponse> responderComentario(
+            @PathVariable Long checkinId,
+            @PathVariable Long comentarioId,
+            @RequestBody(required = false) CheckinAcaoRequest body
+    ) {
+        if (body == null || body.getUsuarioId() == null || body.getTexto() == null || body.getTexto().isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        ComentarioResponse comentario = checkinService.comentar(checkinId, body.getUsuarioId(), body.getTexto(), comentarioId);
+        if (comentario == null) {
+            return ResponseEntity.status(404).build();
+        }
+        return ResponseEntity.ok(comentario);
+    }
+
     @GetMapping("/api/checkins/{checkinId}")
     public ResponseEntity<CheckinResponse> buscar(
             @PathVariable Long checkinId,

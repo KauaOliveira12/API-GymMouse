@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class CheckinService {
@@ -147,16 +149,29 @@ public class CheckinService {
 
     @Transactional
     public ComentarioResponse comentar(Long checkinId, Long usuarioId, String texto) {
+        return comentar(checkinId, usuarioId, texto, null);
+    }
+
+    @Transactional
+    public ComentarioResponse comentar(Long checkinId, Long usuarioId, String texto, Long comentarioPaiId) {
         Checkin checkin = checkinRepository.findById(checkinId).orElse(null);
         Usuario usuario = usuarioId == null ? null : usuarioRepository.findById(usuarioId).orElse(null);
         String textoLimpo = texto == null ? "" : texto.trim();
         if (checkin == null || usuario == null || textoLimpo.isBlank() || !podeInteragir(usuario.getId(), checkin)) {
             return null;
         }
+        CheckinComentario comentarioPai = null;
+        if (comentarioPaiId != null) {
+            comentarioPai = checkinComentarioRepository.findById(comentarioPaiId).orElse(null);
+            if (comentarioPai == null || !comentarioPai.getCheckin().getId().equals(checkin.getId())) {
+                return null;
+            }
+        }
 
         CheckinComentario comentario = new CheckinComentario();
         comentario.setCheckin(checkin);
         comentario.setUsuario(usuario);
+        comentario.setComentarioPai(comentarioPai);
         comentario.setTexto(textoLimpo);
         comentario.setDataCriacao(LocalDateTime.now());
         return new ComentarioResponse(checkinComentarioRepository.save(comentario));
@@ -167,9 +182,24 @@ public class CheckinService {
         if (checkinId == null || !checkinRepository.existsById(checkinId)) {
             return null;
         }
-        return checkinComentarioRepository.findByCheckinIdOrderByDataCriacaoAsc(checkinId)
+        List<ComentarioResponse> todos = checkinComentarioRepository.findByCheckinIdOrderByDataCriacaoAsc(checkinId)
                 .stream()
                 .map(ComentarioResponse::new)
+                .toList();
+        Map<Long, ComentarioResponse> porId = todos.stream()
+                .collect(Collectors.toMap(ComentarioResponse::getId, comentario -> comentario));
+
+        todos.forEach(comentario -> {
+            if (comentario.getComentarioPaiId() != null) {
+                ComentarioResponse pai = porId.get(comentario.getComentarioPaiId());
+                if (pai != null) {
+                    pai.getRespostas().add(comentario);
+                }
+            }
+        });
+
+        return todos.stream()
+                .filter(comentario -> comentario.getComentarioPaiId() == null)
                 .toList();
     }
 
