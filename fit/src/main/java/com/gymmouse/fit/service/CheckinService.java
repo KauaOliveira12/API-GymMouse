@@ -32,6 +32,7 @@ public class CheckinService {
     private final GrupoRepository grupoRepository;
     private final UsuarioGrupoRepository usuarioGrupoRepository;
     private final PontuacaoService pontuacaoService;
+    private final PontuacaoGrupoService pontuacaoGrupoService;
 
     public CheckinService(
             CheckinRepository checkinRepository,
@@ -40,7 +41,8 @@ public class CheckinService {
             UsuarioRepository usuarioRepository,
             GrupoRepository grupoRepository,
             UsuarioGrupoRepository usuarioGrupoRepository,
-            PontuacaoService pontuacaoService
+            PontuacaoService pontuacaoService,
+            PontuacaoGrupoService pontuacaoGrupoService
     ) {
         this.checkinRepository = checkinRepository;
         this.checkinCurtidaRepository = checkinCurtidaRepository;
@@ -49,6 +51,7 @@ public class CheckinService {
         this.grupoRepository = grupoRepository;
         this.usuarioGrupoRepository = usuarioGrupoRepository;
         this.pontuacaoService = pontuacaoService;
+        this.pontuacaoGrupoService = pontuacaoGrupoService;
     }
 
     public enum CriarResultado {
@@ -106,7 +109,8 @@ public class CheckinService {
         checkin.setTitulo(titulo);
         checkin.setDescricao(req.getDescricao() == null ? "" : req.getDescricao().trim());
         checkin.setImagem(imagem);
-        checkin.setPontos(1);
+        int pontos = pontuacaoGrupoService.calcularPontosCheckin(grupo, usuario.getId());
+        checkin.setPontos(pontos);
         checkin.setDataCriacao(LocalDateTime.now());
 
         Checkin salvo = checkinRepository.save(checkin);

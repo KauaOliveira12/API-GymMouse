@@ -92,7 +92,8 @@ public class GrupoController {
     }
 
     /**
-     * Atualiza nome e/ou descrição. Somente o criador do grupo ({@code usuarioId}). O código de acesso não é alterado aqui.
+     * Atualiza nome, descrição, imagem de capa e regras de pontuação.
+     * Somente o criador do grupo ({@code usuarioId}). O código de acesso não é alterado aqui.
      */
     @PutMapping("/{id}")
     public ResponseEntity<Grupo> atualizarGrupo(@PathVariable Long id, @RequestBody AtualizarGrupoRequest body) {

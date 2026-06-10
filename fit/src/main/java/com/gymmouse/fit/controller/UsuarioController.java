@@ -101,6 +101,10 @@ public class UsuarioController {
         req.setCriadorId(usuarioId);
         req.setNome(corpo.getNome());
         req.setDescricao(corpo.getDescricao());
+        req.setImagemCapa(corpo.getImagemCapa());
+        req.setPontosPorCheckin(corpo.getPontosPorCheckin());
+        req.setDiasSequenciaParaBonus(corpo.getDiasSequenciaParaBonus());
+        req.setMultiplicadorSequencia(corpo.getMultiplicadorSequencia());
         GrupoGestaoService.CriarStatus status = grupoGestaoService.criar(req);
         return switch (status.getResultado()) {
             case OK -> ResponseEntity.ok(status.getGrupo());
