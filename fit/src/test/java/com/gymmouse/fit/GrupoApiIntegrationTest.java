@@ -172,6 +172,57 @@ class GrupoApiIntegrationTest {
     }
 
     @Test
+    void atualizarGrupo_criadorPodeEditarCapaERegrasPontuacao() throws Exception {
+        long criador = criarUsuario("capa");
+        String gJson = criarGrupoJson(criador, "Grupo Capa");
+        long grupoId = readLong(gJson, "$.id");
+
+        mockMvc.perform(put("/api/grupos/" + grupoId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"usuarioId":%d,"imagemCapa":"https://img.test/capa.png","pontosPorCheckin":5,
+                                "diasSequenciaParaBonus":3,"multiplicadorSequencia":2.0}
+                                """.formatted(criador)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.imagemCapa").value("https://img.test/capa.png"))
+                .andExpect(jsonPath("$.pontosPorCheckin").value(5))
+                .andExpect(jsonPath("$.diasSequenciaParaBonus").value(3))
+                .andExpect(jsonPath("$.multiplicadorSequencia").value(2.0));
+    }
+
+    @Test
+    void atualizarGrupo_estranhoNaoPodeEditarRegrasPontuacao() throws Exception {
+        long criador = criarUsuario("regras");
+        long estranho = criarUsuario("regrasE");
+        long grupoId = readLong(criarGrupoJson(criador, "Grupo Regras"), "$.id");
+
+        mockMvc.perform(put("/api/grupos/" + grupoId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"usuarioId\":" + estranho + ",\"pontosPorCheckin\":99}"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void checkin_usaPontosPersonalizadosDoGrupo() throws Exception {
+        long criador = criarUsuario("pts");
+        String gJson = criarGrupoJson(criador, "Grupo Pontos");
+        long grupoId = readLong(gJson, "$.id");
+
+        mockMvc.perform(put("/api/grupos/" + grupoId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"usuarioId\":" + criador + ",\"pontosPorCheckin\":7}"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/checkins")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"usuarioId":%d,"grupoId":%d,"titulo":"Treino","descricao":"ok","imagem":"img"}
+                                """.formatted(criador, grupoId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pontos").value(7));
+    }
+
+    @Test
     void deletarGrupo_apenasCriadorPodeRemover() throws Exception {
         long criador = criarUsuario("c4");
         long estranho = criarUsuario("e4");

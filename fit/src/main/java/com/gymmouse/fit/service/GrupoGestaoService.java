@@ -78,6 +78,10 @@ public class GrupoGestaoService {
         g.setDescricao(req.getDescricao() != null ? req.getDescricao().trim() : null);
         g.setCriador(criador);
         g.setCodigoAcesso(gerarCodigoAcessoUnico());
+        if (!aplicarConfiguracaoInicial(g, req.getImagemCapa(), req.getPontosPorCheckin(),
+                req.getDiasSequenciaParaBonus(), req.getMultiplicadorSequencia())) {
+            return new CriarStatus(CriarResultado.DADOS_INVALIDOS, null);
+        }
         Grupo salvo = grupoRepository.save(g);
         vincularMembro(criador, salvo);
         salvo.setTotalMembros(usuarioGrupoRepository.countByGrupoId(salvo.getId()));
@@ -127,6 +131,13 @@ public class GrupoGestaoService {
         }
         if (req.getDescricao() != null) {
             g.setDescricao(req.getDescricao().isBlank() ? null : req.getDescricao().trim());
+        }
+        if (req.getImagemCapa() != null) {
+            g.setImagemCapa(req.getImagemCapa().isBlank() ? null : req.getImagemCapa().trim());
+        }
+        if (!aplicarRegrasPontuacao(g, req.getPontosPorCheckin(), req.getDiasSequenciaParaBonus(),
+                req.getMultiplicadorSequencia())) {
+            return new AtualizarStatus(AtualizarResultado.DADOS_INVALIDOS, null);
         }
         Grupo salvo = grupoRepository.save(g);
         salvo.setTotalMembros(usuarioGrupoRepository.countByGrupoId(salvo.getId()));
@@ -183,5 +194,57 @@ public class GrupoGestaoService {
             codigo = java.util.UUID.randomUUID().toString().replace("-", "").substring(0, TAMANHO_CODIGO).toUpperCase();
         }
         return codigo;
+    }
+
+    private boolean aplicarConfiguracaoInicial(
+            Grupo grupo,
+            String imagemCapa,
+            Integer pontosPorCheckin,
+            Integer diasSequenciaParaBonus,
+            Double multiplicadorSequencia
+    ) {
+        grupo.setPontosPorCheckin(1);
+        if (imagemCapa != null && !imagemCapa.isBlank()) {
+            grupo.setImagemCapa(imagemCapa.trim());
+        }
+        return aplicarRegrasPontuacao(grupo, pontosPorCheckin, diasSequenciaParaBonus, multiplicadorSequencia);
+    }
+
+    private boolean aplicarRegrasPontuacao(
+            Grupo grupo,
+            Integer pontosPorCheckin,
+            Integer diasSequenciaParaBonus,
+            Double multiplicadorSequencia
+    ) {
+        if (pontosPorCheckin != null) {
+            if (pontosPorCheckin <= 0) {
+                return false;
+            }
+            grupo.setPontosPorCheckin(pontosPorCheckin);
+        }
+        if (diasSequenciaParaBonus != null) {
+            if (diasSequenciaParaBonus <= 0) {
+                grupo.setDiasSequenciaParaBonus(null);
+                grupo.setMultiplicadorSequencia(null);
+            } else {
+                grupo.setDiasSequenciaParaBonus(diasSequenciaParaBonus);
+            }
+        }
+        if (multiplicadorSequencia != null) {
+            if (multiplicadorSequencia <= 0) {
+                grupo.setMultiplicadorSequencia(null);
+            } else {
+                grupo.setMultiplicadorSequencia(multiplicadorSequencia);
+            }
+        }
+        if (grupo.getDiasSequenciaParaBonus() != null
+                && (grupo.getMultiplicadorSequencia() == null || grupo.getMultiplicadorSequencia() <= 0)) {
+            return false;
+        }
+        if (grupo.getMultiplicadorSequencia() != null
+                && (grupo.getDiasSequenciaParaBonus() == null || grupo.getDiasSequenciaParaBonus() <= 0)) {
+            return false;
+        }
+        return true;
     }
 }

@@ -10,4 +10,6 @@ import java.util.List;
 public interface CheckinRepository extends JpaRepository<Checkin, Long> {
 
     List<Checkin> findByGrupoIdOrderByDataCriacaoDesc(Long grupoId);
+
+    List<Checkin> findByUsuarioIdAndGrupoId(Long usuarioId, Long grupoId);
 }
