@@ -14,6 +14,9 @@ public class CheckinResponse {
     private String titulo;
     private String desc;
     private String imagem;
+    private Double latitude;
+    private Double longitude;
+    private String localizacao;
     private int likes;
     private int comments;
     private boolean curtido;
@@ -36,6 +39,9 @@ public class CheckinResponse {
         this.titulo = checkin.getTitulo();
         this.desc = checkin.getDescricao();
         this.imagem = checkin.getImagem();
+        this.latitude = checkin.getLatitude();
+        this.longitude = checkin.getLongitude();
+        this.localizacao = checkin.getLocalizacao();
         this.likes = (int) likes;
         this.comments = (int) comments;
         this.curtido = curtido;
@@ -73,6 +79,18 @@ public class CheckinResponse {
 
     public String getImagem() {
         return imagem;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public String getLocalizacao() {
+        return localizacao;
     }
 
     public int getLikes() {

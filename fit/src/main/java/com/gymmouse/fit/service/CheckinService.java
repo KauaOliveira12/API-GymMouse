@@ -90,6 +90,9 @@ public class CheckinService {
         if (titulo.isBlank() || imagem.isBlank()) {
             return new CriarStatus(CriarResultado.DADOS_INVALIDOS, null);
         }
+        if (!coordenadasValidas(req.getLatitude(), req.getLongitude())) {
+            return new CriarStatus(CriarResultado.DADOS_INVALIDOS, null);
+        }
 
         Usuario usuario = usuarioRepository.findById(req.getUsuarioId()).orElse(null);
         if (usuario == null) {
@@ -109,6 +112,9 @@ public class CheckinService {
         checkin.setTitulo(titulo);
         checkin.setDescricao(req.getDescricao() == null ? "" : req.getDescricao().trim());
         checkin.setImagem(imagem);
+        checkin.setLatitude(req.getLatitude());
+        checkin.setLongitude(req.getLongitude());
+        checkin.setLocalizacao(req.getLocalizacao() == null ? "" : req.getLocalizacao().trim());
         int pontos = pontuacaoGrupoService.calcularPontosCheckin(grupo, usuario.getId());
         checkin.setPontos(pontos);
         checkin.setDataCriacao(LocalDateTime.now());
@@ -219,6 +225,19 @@ public class CheckinService {
         long comments = checkinComentarioRepository.countByCheckinId(checkin.getId());
         boolean curtido = usuarioId != null && checkinCurtidaRepository.existsByCheckinIdAndUsuarioId(checkin.getId(), usuarioId);
         return new CheckinResponse(checkin, likes, comments, curtido);
+    }
+
+    private boolean coordenadasValidas(Double latitude, Double longitude) {
+        if (latitude == null && longitude == null) {
+            return true;
+        }
+        if (latitude == null || longitude == null) {
+            return false;
+        }
+        return latitude >= -90
+                && latitude <= 90
+                && longitude >= -180
+                && longitude <= 180;
     }
 
     private boolean podeInteragir(Long usuarioId, Checkin checkin) {

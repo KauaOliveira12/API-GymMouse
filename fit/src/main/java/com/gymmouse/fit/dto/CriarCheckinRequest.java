@@ -1,5 +1,7 @@
 package com.gymmouse.fit.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 public class CriarCheckinRequest {
 
     private Long usuarioId;
@@ -7,6 +9,12 @@ public class CriarCheckinRequest {
     private String titulo;
     private String descricao;
     private String imagem;
+    @JsonAlias("lat")
+    private Double latitude;
+    @JsonAlias({"lng", "lon"})
+    private Double longitude;
+    @JsonAlias({"location", "endereco"})
+    private String localizacao;
 
     public Long getUsuarioId() {
         return usuarioId;
@@ -46,5 +54,29 @@ public class CriarCheckinRequest {
 
     public void setImagem(String imagem) {
         this.imagem = imagem;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public String getLocalizacao() {
+        return localizacao;
+    }
+
+    public void setLocalizacao(String localizacao) {
+        this.localizacao = localizacao;
     }
 }
