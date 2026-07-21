@@ -16,8 +16,7 @@ public class Grupo {
 
     private String descricao;
 
-    @Lob
-    @Column(name = "imagem_capa", columnDefinition = "LONGTEXT")
+    @Column(name = "imagem_capa", columnDefinition = "TEXT")
     private String imagemCapa;
 
     @Column(name = "pontos_por_checkin", nullable = false)

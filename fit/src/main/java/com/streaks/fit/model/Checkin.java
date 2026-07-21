@@ -26,8 +26,7 @@ public class Checkin {
     @Column(length = 1000)
     private String descricao;
 
-    @Lob
-    @Column(name = "imagem", columnDefinition = "LONGTEXT", nullable = false)
+    @Column(name = "imagem", columnDefinition = "TEXT", nullable = false)
     private String imagem;
 
     @Column(name = "latitude")
