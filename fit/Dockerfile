@@ -1,9 +1,14 @@
-# Usa a imagem do Java 17 (ou altere para 21 se o seu projeto usar Java 21)
+# Usa a imagem do Java 17
 FROM eclipse-temurin:17-jdk-alpine AS build
 WORKDIR /app
 
-# Copia os arquivos do Maven e baixa as dependências
-COPY .. .
+# Copia os arquivos do projeto
+COPY . .
+
+# Dá permissão de execução para o wrapper do Maven
+RUN chmod +x ./mvnw
+
+# Compila o projeto
 RUN ./mvnw clean package -DskipTests
 
 # Estágio de execução
