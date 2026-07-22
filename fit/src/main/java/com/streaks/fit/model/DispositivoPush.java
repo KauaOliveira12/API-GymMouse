@@ -3,10 +3,7 @@ package com.streaks.fit.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(
-        name = "dispositivos_push",
-        uniqueConstraints = @UniqueConstraint(name = "uk_dispositivo_token", columnNames = "token")
-)
+@Table(name = "dispositivos_push")
 public class DispositivoPush {
 
     @Id
@@ -17,7 +14,7 @@ public class DispositivoPush {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, unique = true, length = 255)
     private String token;
 
     @Column(length = 40)

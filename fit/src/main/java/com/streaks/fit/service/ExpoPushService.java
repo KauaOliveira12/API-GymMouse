@@ -21,12 +21,11 @@ public class ExpoPushService {
     private static final String EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
 
     private final RestClient restClient;
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final DispositivoPushRepository dispositivoPushRepository;
 
-    public ExpoPushService(DispositivoPushRepository dispositivoPushRepository, ObjectMapper objectMapper) {
+    public ExpoPushService(DispositivoPushRepository dispositivoPushRepository) {
         this.dispositivoPushRepository = dispositivoPushRepository;
-        this.objectMapper = objectMapper;
         this.restClient = RestClient.builder().baseUrl(EXPO_PUSH_URL).build();
     }
 
