@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -24,15 +25,18 @@ public class GrupoMembroService {
     private final GrupoRepository grupoRepository;
     private final UsuarioRepository usuarioRepository;
     private final UsuarioGrupoRepository usuarioGrupoRepository;
+    private final NotificacaoService notificacaoService;
 
     public GrupoMembroService(
             GrupoRepository grupoRepository,
             UsuarioRepository usuarioRepository,
-            UsuarioGrupoRepository usuarioGrupoRepository
+            UsuarioGrupoRepository usuarioGrupoRepository,
+            NotificacaoService notificacaoService
     ) {
         this.grupoRepository = grupoRepository;
         this.usuarioRepository = usuarioRepository;
         this.usuarioGrupoRepository = usuarioGrupoRepository;
+        this.notificacaoService = notificacaoService;
     }
 
     public enum EntradaResultado {
@@ -91,6 +95,18 @@ public class GrupoMembroService {
                 grupo.getNome(),
                 usuario.getId(),
                 salvo.getDataEntrada()
+        );
+        notificacaoService.notificarMembrosDoGrupo(
+                grupo.getId(),
+                usuario.getId(),
+                NotificacaoService.TipoPreferencia.GRUPOS,
+                "Novo membro",
+                usuario.getNome() + " entrou no grupo " + grupo.getNome(),
+                Map.of(
+                        "grupoId", grupo.getId(),
+                        "grupoNome", grupo.getNome() == null ? "" : grupo.getNome(),
+                        "tipo", "grupos"
+                )
         );
         return new EntradaStatus(EntradaResultado.OK, dto);
     }

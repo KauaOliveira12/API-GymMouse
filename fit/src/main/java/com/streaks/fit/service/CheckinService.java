@@ -33,6 +33,7 @@ public class CheckinService {
     private final UsuarioGrupoRepository usuarioGrupoRepository;
     private final PontuacaoService pontuacaoService;
     private final PontuacaoGrupoService pontuacaoGrupoService;
+    private final NotificacaoService notificacaoService;
 
     public CheckinService(
             CheckinRepository checkinRepository,
@@ -42,7 +43,8 @@ public class CheckinService {
             GrupoRepository grupoRepository,
             UsuarioGrupoRepository usuarioGrupoRepository,
             PontuacaoService pontuacaoService,
-            PontuacaoGrupoService pontuacaoGrupoService
+            PontuacaoGrupoService pontuacaoGrupoService,
+            NotificacaoService notificacaoService
     ) {
         this.checkinRepository = checkinRepository;
         this.checkinCurtidaRepository = checkinCurtidaRepository;
@@ -52,6 +54,7 @@ public class CheckinService {
         this.usuarioGrupoRepository = usuarioGrupoRepository;
         this.pontuacaoService = pontuacaoService;
         this.pontuacaoGrupoService = pontuacaoGrupoService;
+        this.notificacaoService = notificacaoService;
     }
 
     public enum CriarResultado {
@@ -121,6 +124,36 @@ public class CheckinService {
 
         Checkin salvo = checkinRepository.save(checkin);
         pontuacaoService.adicionarPontos(usuario.getId(), grupo.getId(), salvo.getPontos());
+
+        Map<String, Object> dataCheckin = Map.of(
+                "grupoId", grupo.getId(),
+                "grupoNome", grupo.getNome() == null ? "" : grupo.getNome(),
+                "checkinId", salvo.getId(),
+                "tipo", "checkin"
+        );
+        notificacaoService.notificarMembrosDoGrupo(
+                grupo.getId(),
+                usuario.getId(),
+                NotificacaoService.TipoPreferencia.CHECKINS,
+                "Novo check-in",
+                usuario.getNome() + " fez check-in em " + grupo.getNome() + ": " + titulo,
+                dataCheckin
+        );
+        if (salvo.getPontos() > 0) {
+            Map<String, Object> dataRanking = Map.of(
+                    "grupoId", grupo.getId(),
+                    "grupoNome", grupo.getNome() == null ? "" : grupo.getNome(),
+                    "tipo", "ranking"
+            );
+            notificacaoService.notificarMembrosDoGrupo(
+                    grupo.getId(),
+                    usuario.getId(),
+                    NotificacaoService.TipoPreferencia.RANKING,
+                    "Ranking atualizado",
+                    usuario.getNome() + " ganhou +" + salvo.getPontos() + " pts em " + grupo.getNome(),
+                    dataRanking
+            );
+        }
 
         return new CriarStatus(CriarResultado.OK, new CheckinResponse(salvo));
     }

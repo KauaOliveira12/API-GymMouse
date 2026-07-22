@@ -26,6 +26,9 @@ public interface UsuarioGrupoRepository extends JpaRepository<UsuarioGrupo, Long
     @Query("SELECT ug.grupo FROM UsuarioGrupo ug JOIN ug.grupo g WHERE ug.usuario.id = :usuarioId ORDER BY g.nome ASC")
     List<Grupo> findGruposByUsuarioId(@Param("usuarioId") Long usuarioId);
 
+    @Query("SELECT ug.usuario.id FROM UsuarioGrupo ug WHERE ug.grupo.id = :grupoId")
+    List<Long> findUsuarioIdsByGrupoId(@Param("grupoId") Long grupoId);
+
     /**
      * Pontos somados desde o início do dia de entrada no grupo (MySQL DATE).
      */
