@@ -4,11 +4,15 @@ import com.streaks.fit.dto.AdicionarPontosRequest;
 import com.streaks.fit.dto.AtualizarUsuarioRequest;
 import com.streaks.fit.dto.CriarGrupoCorpoLeve;
 import com.streaks.fit.dto.CriarGrupoRequest;
+import com.streaks.fit.dto.EsqueciSenhaRequest;
+import com.streaks.fit.dto.MensagemResponse;
+import com.streaks.fit.dto.RedefinirSenhaRequest;
 import com.streaks.fit.model.Grupo;
 import com.streaks.fit.model.Usuario; // Ajuste para o seu pacote
 import com.streaks.fit.repository.UsuarioRepository; // Ajuste para o seu pacote
 import com.streaks.fit.service.GrupoGestaoService;
 import com.streaks.fit.service.PontuacaoService;
+import com.streaks.fit.service.RecuperacaoSenhaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +30,9 @@ public class UsuarioController {
 
     @Autowired
     private GrupoGestaoService grupoGestaoService;
+
+    @Autowired
+    private RecuperacaoSenhaService recuperacaoSenhaService;
 
     // Rota para Cadastrar Usuário
     @PostMapping
@@ -47,6 +54,60 @@ public class UsuarioController {
 
         // Se errou a senha ou não existe o e-mail, devolve erro 401 (Não autorizado)
         return ResponseEntity.status(401).build();
+    }
+
+    /**
+     * Gera um código de 6 dígitos e envia por e-mail para redefinir a senha.
+     * Resposta genérica para não revelar se o e-mail existe.
+     */
+    @PostMapping("/esqueci-senha")
+    public ResponseEntity<MensagemResponse> esqueciSenha(@RequestBody(required = false) EsqueciSenhaRequest body) {
+        if (body == null) {
+            return ResponseEntity.badRequest().body(new MensagemResponse("Informe o e-mail."));
+        }
+
+        RecuperacaoSenhaService.ResultadoSolicitacao resultado =
+                recuperacaoSenhaService.solicitarCodigo(body.getEmail());
+
+        return switch (resultado) {
+            case DADOS_INVALIDOS -> ResponseEntity.badRequest()
+                    .body(new MensagemResponse("Informe um e-mail válido."));
+            case FALHA_EMAIL -> ResponseEntity.status(503)
+                    .body(new MensagemResponse(
+                            "Não foi possível enviar o e-mail agora. Tente novamente em instantes."
+                    ));
+            case OK -> ResponseEntity.ok(new MensagemResponse(
+                    "Se este e-mail estiver cadastrado, enviaremos um código para redefinir a senha."
+            ));
+        };
+    }
+
+    /**
+     * Valida o código recebido por e-mail e grava a nova senha.
+     */
+    @PostMapping("/redefinir-senha")
+    public ResponseEntity<MensagemResponse> redefinirSenha(@RequestBody(required = false) RedefinirSenhaRequest body) {
+        if (body == null) {
+            return ResponseEntity.badRequest().body(new MensagemResponse("Dados inválidos."));
+        }
+
+        RecuperacaoSenhaService.ResultadoRedefinicao resultado = recuperacaoSenhaService.redefinirSenha(
+                body.getEmail(),
+                body.getCodigo(),
+                body.getNovaSenha()
+        );
+
+        return switch (resultado) {
+            case DADOS_INVALIDOS -> ResponseEntity.badRequest()
+                    .body(new MensagemResponse("Preencha e-mail, código e nova senha."));
+            case SENHA_CURTA -> ResponseEntity.badRequest()
+                    .body(new MensagemResponse("A nova senha deve ter pelo menos 4 caracteres."));
+            case CODIGO_INVALIDO -> ResponseEntity.status(400)
+                    .body(new MensagemResponse("Código inválido. Solicite um novo código."));
+            case CODIGO_EXPIRADO -> ResponseEntity.status(400)
+                    .body(new MensagemResponse("Código expirado. Solicite um novo código."));
+            case OK -> ResponseEntity.ok(new MensagemResponse("Senha redefinida com sucesso. Faça login."));
+        };
     }
 
     @GetMapping("/{id}")
@@ -80,6 +141,11 @@ public class UsuarioController {
             usuario.setEmail(email);
             if (body.getSenha() != null && !body.getSenha().isBlank()) {
                 usuario.setSenha(body.getSenha());
+            }
+            // null = não altera a foto; string vazia = remove; valor = grava
+            if (body.getFotoPerfil() != null) {
+                String foto = body.getFotoPerfil().trim();
+                usuario.setFotoPerfil(foto.isBlank() ? null : foto);
             }
             return ResponseEntity.ok(repository.save(usuario));
         }).orElseGet(() -> ResponseEntity.status(404).build());

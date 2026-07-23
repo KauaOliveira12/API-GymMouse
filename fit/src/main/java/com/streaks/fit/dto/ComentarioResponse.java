@@ -11,6 +11,7 @@ public class ComentarioResponse {
     private Long id;
     private Long usuarioId;
     private String nome;
+    private String fotoPerfil;
     private String texto;
     private LocalDateTime dataCriacao;
     private Long comentarioPaiId;
@@ -20,6 +21,7 @@ public class ComentarioResponse {
         this.id = comentario.getId();
         this.usuarioId = comentario.getUsuario().getId();
         this.nome = comentario.getUsuario().getNome();
+        this.fotoPerfil = comentario.getUsuario().getFotoPerfil();
         this.texto = comentario.getTexto();
         this.dataCriacao = comentario.getDataCriacao();
         this.comentarioPaiId = comentario.getComentarioPai() == null ? null : comentario.getComentarioPai().getId();
@@ -35,6 +37,10 @@ public class ComentarioResponse {
 
     public String getNome() {
         return nome;
+    }
+
+    public String getFotoPerfil() {
+        return fotoPerfil;
     }
 
     public String getTexto() {

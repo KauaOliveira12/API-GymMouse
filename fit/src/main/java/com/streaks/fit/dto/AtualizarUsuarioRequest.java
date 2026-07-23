@@ -5,6 +5,7 @@ public class AtualizarUsuarioRequest {
     private String nome;
     private String email;
     private String senha;
+    private String fotoPerfil;
 
     public String getNome() {
         return nome;
@@ -28,5 +29,13 @@ public class AtualizarUsuarioRequest {
 
     public void setSenha(String senha) {
         this.senha = senha;
+    }
+
+    public String getFotoPerfil() {
+        return fotoPerfil;
+    }
+
+    public void setFotoPerfil(String fotoPerfil) {
+        this.fotoPerfil = fotoPerfil;
     }
 }

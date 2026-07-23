@@ -10,6 +10,7 @@ public class CheckinResponse {
     private Long usuarioId;
     private Long grupoId;
     private String nome;
+    private String fotoPerfil;
     private String tempo;
     private String titulo;
     private String desc;
@@ -35,6 +36,7 @@ public class CheckinResponse {
         this.usuarioId = checkin.getUsuario().getId();
         this.grupoId = checkin.getGrupo().getId();
         this.nome = checkin.getUsuario().getNome();
+        this.fotoPerfil = checkin.getUsuario().getFotoPerfil();
         this.tempo = "Agora mesmo";
         this.titulo = checkin.getTitulo();
         this.desc = checkin.getDescricao();
@@ -63,6 +65,10 @@ public class CheckinResponse {
 
     public String getNome() {
         return nome;
+    }
+
+    public String getFotoPerfil() {
+        return fotoPerfil;
     }
 
     public String getTempo() {
